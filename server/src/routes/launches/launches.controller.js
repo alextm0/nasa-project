@@ -1,7 +1,16 @@
-import { getAllLaunches, scheduleNewLaunch, existsLaunchWithId, abortLaunchById, getLaunchById } from "../../models/launches.model.js";
+import { 
+  getAllLaunches, 
+  scheduleNewLaunch, 
+  existsLaunchWithId, 
+  abortLaunchById, 
+  getLaunchById 
+} from "../../models/launches.model.js";
+import { getPagination } from '../../services/query.js';
 
 async function httpGetAllLaunches(req, res) {
-  const allLaunches = await getAllLaunches();
+  const { skip, limit } = getPagination(req.query);
+
+  const allLaunches = await getAllLaunches(skip, limit);
   return res.status(200).json(allLaunches);
 }
 
@@ -28,7 +37,6 @@ async function httpAddNewLaunch(req, res) {
 async function httpAbortLaunch(req, res) {
   const launchId = Number(req.params.id);
 
-  // If launch doesn't exist
   const existsLaunch = await existsLaunchWithId(launchId);
   if(!existsLaunch) {
     return res.status(404).json({
