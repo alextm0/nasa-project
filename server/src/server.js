@@ -1,28 +1,46 @@
+// server.js
 import http from 'http';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 
-import { getAllHabitablePlanets } from './models/planets.model.js'
-import {loadPlanetsData} from './models/planets.model.js';
-
+import { getAllHabitablePlanets, loadPlanetsData } from './models/planets.model.js';
 import app from './app.js';
 
-// Loads environment variables from a .env file into process.env
+// Load env vars
 dotenv.config();
 
 const PORT = process.env.PORT || 8000;
+const MONGO_URL = process.env.MONGO_URL;
+if (!MONGO_URL) {
+  console.error('Missing MONGO_URL in environment');
+  process.exit(1);
+}
 
 const server = http.createServer(app);
 
-async function serverStart() {
-  await loadPlanetsData();
-  
+async function startServer() {
+  try {
+    // Mongoose 6+ uses these under the hood:
+    await mongoose.connect(MONGO_URL);
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
+  }
+
+  // Load any pre-required data (e.g. your planets)
+  try {
+    await loadPlanetsData();
+    console.log(`Loaded ${getAllHabitablePlanets().length} habitable planets`);
+  } catch (err) {
+    console.error('Error loading planets data:', err);
+    process.exit(1);
+  }
+
+  // Start HTTP server
   server.listen(PORT, () => {
-    console.log("Number of planets: ", getAllHabitablePlanets().length);
-    console.log(`Server listening on port ${PORT}...`);
+    console.log(`Server listening on http://localhost:${PORT}...`);
   });
 }
 
-serverStart().catch(err => {
-  console.error('Error starting server:', err);
-  process.exit(1);
-});
+startServer();

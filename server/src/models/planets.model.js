@@ -6,7 +6,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
+import mongoose from 'mongoose';
+
+import { Planet } from './planets.mongo.js';
+
 const habitablePlanets = [];
+
+function isHabitablePlanet(planet) {
+  return planet['koi_disposition'] === "CONFIRMED"
+    && planet['koi_insol'] > 0.36 && planet['koi_insol'] < 1.1
+    && planet['koi_prad'] < 1.6; 
+}
 
 function loadPlanetsData() {
   return new Promise((resolve, reject) => {
@@ -20,32 +30,41 @@ function loadPlanetsData() {
       skip_empty_lines: true
     });
 
-    function isHabitablePlanet(planet) {
-      return planet['koi_disposition'] === "CONFIRMED"
-        && planet['koi_insol'] > 0.36 && planet['koi_insol'] < 1.1
-        && planet['koi_prad'] < 1.6; 
-    }
-
     stream
       .pipe(parser)             
-      .on('data', row => {
+      .on('data', async (row) => {
         if(isHabitablePlanet(row)) {
-          habitablePlanets.push(row);
+          savePlanet(row);
         }
       })
       .on('error', err => {
         console.error('Error:', err);
         reject();
       })
-      .on('end', () => {
-        console.log('Total habitable planets found:', habitablePlanets.length);
+      .on('end', async () => {
+        const countPlanetsFound = (await getAllHabitablePlanets()).length;
+        console.log('Total habitable planets found:', countPlanetsFound);
         resolve();
       });
   });
 };
 
-function getAllHabitablePlanets() {
-  return habitablePlanets;
+async function getAllHabitablePlanets() {
+  return await Planet.find();
+}
+
+async function savePlanet(planet) {
+  try {
+    await Planet.updateOne({
+      keplerName: planet.kepler_name
+    }, {
+      keplerName: planet.kepler_name,
+    }, {
+      upsert: true,
+    });
+  } catch (error) {
+    console.error('Could not save planet', error);
+  }
 }
 
 export {
