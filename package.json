@@ -7,7 +7,6 @@
     "install-client": "npm install --prefix client",
     "install-server": "npm install --prefix server",
     "bootstrap": "npm run install-client && npm run install-server",
-    
     "client": "npm start --prefix client",
     "server": "npm run dev --prefix server",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -19,5 +18,8 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "axios": "^1.8.4"
   }
 }

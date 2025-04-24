@@ -1,4 +1,3 @@
-// services/mongo.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
@@ -6,6 +5,8 @@ import {
   loadPlanetsData,
   getAllHabitablePlanets,
 } from '../models/planets.model.js';
+
+import { loadLaunchesData } from '../models/launches.model.js';
 
 dotenv.config();
 
@@ -45,6 +46,8 @@ export async function disconnectDB() {
 export async function loadInitialData() {
   try {
     await loadPlanetsData();
+    await loadLaunchesData();
+
     const planets = await getAllHabitablePlanets();
     console.log(`✅ Loaded ${planets.length} habitable planets`);
   } catch (err) {
