@@ -1,137 +1,192 @@
-# NASA Mission Control Project
+# 🚀 NASA Mission Control Project
 
-A full-stack application for NASA mission control, featuring a modern React frontend and Node.js/Express backend with MongoDB persistence. This project serves as a comprehensive learning experience in building scalable architectures, middleware, REST API development, and deployment workflows.
+A full-stack mission-control dashboard for NASA data. Built with a React frontend and a Node.js/Express backend, this project uses MongoDB for data persistence and integrates external APIs like SpaceX for live launch data.
 
-## Table of Contents
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Database Setup](#database-setup)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Build & Deployment](#build--deployment)
-- [Learning Experience](#learning-experience)
+---
 
-## Features
-- Interactive UI with ARWES framework  
-- Planet data visualization (CSV → MongoDB upsert)  
-- Launch management with persistent storage (create, read, abort)  
-- Environment-driven configuration (`.env`)  
-- Centralized DB service with Mongoose  
-- Error handling and request logging (Morgan)  
-- Scalable REST API architecture  
+## 📋 Table of Contents
 
-## Tech Stack
+- [🚀 NASA Mission Control Project](#-nasa-mission-control-project)
+  - [📋 Table of Contents](#-table-of-contents)
+  - [⚙️ Features](#️-features)
+  - [🧰 Tech Stack](#-tech-stack)
+  - [🔧 Prerequisites](#-prerequisites)
+  - [⚙️ Setup \& Scripts](#️-setup--scripts)
+  - [🔑 Environment Variables](#-environment-variables)
+  - [📁 Folder Structure](#-folder-structure)
+  - [🌐 External API Integration](#-external-api-integration)
+  - [📊 Data Ingestion](#-data-ingestion)
+  - [🚀 Development \& Usage](#-development--usage)
+  - [🏗️ Build \& Deployment](#️-build--deployment)
+  - [🎓 Learning Outcomes](#-learning-outcomes)
+  - [🤝 Contributing](#-contributing)
+  - [📜 License](#-license)
 
-**Frontend**  
-- React 17  
-- React Router  
-- ARWES UI Framework  
-- cross-env  
+---
 
-**Backend**  
-- Node.js  
-- Express 5  
-- MongoDB & Mongoose  
-- CORS  
-- dotenv  
-- Morgan for HTTP request logging  
-- Native HTTP server wrapper  
+## ⚙️ Features
 
-## Prerequisites
-- Node.js v16+  
-- npm v8+  
-- A running MongoDB instance (local or cloud)
+- **Launch management**: Create, list, and abort missions with persistent storage  
+- **Planet catalog**: Import habitable planet data from CSV into MongoDB  
+- **Live launch data**: Fetch and store SpaceX launch details via REST API  
+- **Middleware & logging**: Structured error handling and HTTP request logging with Morgan  
+- **Environment-driven configuration**: Flexible setup via `.env`  
 
-## Installation
+---
 
-1. **Clone the repo**  
-   ```bash
-   git clone https://github.com/alextm0/nasa-project.git
-   cd nasa-project
-   ```
+## 🧰 Tech Stack
 
-2. **Bootstrap dependencies**  
-   ```bash
-   npm run bootstrap
-   ```
-   Installs packages in both `client/` and `server/`.
+- **Frontend**: React 17, React Router, React Scripts  
+- **Backend**: Node.js, Express 5, Axios  
+- **Database**: MongoDB & Mongoose  
+- **Dev & CI**: GitHub Actions, concurrently, cross-env  
+- **Testing**: Jest & Supertest  
 
-3. **Configure environment**  
-   Create a `.env` file in `server/` containing at minimum:  
-   ```env
-   PORT=8000
-   MONGO_URL=mongodb://localhost:27017/nasa
-   ```
+---
 
-## Database Setup
+## 🔧 Prerequisites
 
-Before running the server, ensure MongoDB is accessible at your `MONGO_URL`. On first start, the application will:
+- Node.js v16 or newer  
+- npm v8 or newer  
+- MongoDB server (local or Atlas cluster)  
 
-1. **Connect** to MongoDB via `services/mongo.js`.  
-2. **Upsert** confirmed habitable planets from `data/kepler_data.csv` into the `planets` collection.  
-3. **Expose** a `launches` collection for persistent storage of mission launches, supporting:
-   - Listing all launches  
-   - Adding a new launch (auto-incremented `flightNumber`)  
-   - Aborting a launch (sets `upcoming=false`, `success=false`)  
+---
 
-All database configuration and initial data loading are centralized in `/server/src/services/mongo.js`.
+## ⚙️ Setup & Scripts
 
-## Usage
+Clone the repository and install all dependencies:
 
-- **Development**  
-  ```bash
-  npm run dev
-  ```
-  Runs both backend (with hot-reload) and frontend concurrently.
+```bash
+git clone https://github.com/alextm0/nasa-project.git
+cd nasa-project
+npm run bootstrap
+```
 
-- **Production**  
-  ```bash
-  npm run deploy
-  ```
-  1. Builds the React app into `server/public`.  
-  2. Starts the Node.js server, which serves API routes and static assets.
+Available scripts (defined in root `package.json`):
 
-## Project Structure
+- `npm run install-client` → install frontend deps  
+- `npm run install-server` → install backend deps  
+- `npm run bootstrap` → both install steps  
+- `npm run client` → start React app  
+- `npm run server` → run backend in dev mode (`nodemon`)  
+- `npm run dev` → run both client and server concurrently  
+- `npm run deploy` → build frontend and serve via backend  
+- `npm run test` → run tests in both client and server  
+
+---
+
+## 🔑 Environment Variables
+
+Create a `.env` file inside the `server/` folder:
+
+```ini
+PORT=5000
+MONGO_URL=<your_mongodb_connection_string>
+SPACEX_API_URL=https://api.spacexdata.com/v4/launches/query
+```
+
+- **PORT**: server listening port  
+- **MONGO_URL**: MongoDB connection URI  
+- **SPACEX_API_URL**: endpoint for querying SpaceX launches  
+
+---
+
+## 📁 Folder Structure
+
 ```
 nasa-project/
-├── client/               # React frontend
-│   ├── public/           # Static assets
-│   └── src/              # React components, styles, utils
-├── server/               # Node.js backend
-│   ├── public/           # Production build of frontend
+├── client/                    # React frontend
+│   ├── public/
+│   └── src/
+│       └── ...                # components, styles, utils
+├── server/                    # Express backend
 │   ├── src/
-│   │   ├── app.js        # Express app & middleware
-│   │   ├── server.js     # HTTP server bootstrap
-│   │   ├── services/     # DB connection & data-loading
-│   │   │   └── mongo.js
-│   │   ├── models/       # Mongoose schemas & data loaders
-│   │   │   ├── launches.model.js
-│   │   │   ├── launches.mongo.js
-│   │   │   ├── planets.model.js
-│   │   │   └── planets.mongo.js
-│   │   └── routes/       # API route definitions
-├── data/                 # CSV input files (e.g. kepler_data.csv)
-├── .env                  # Server environment variables (not in repo)
-├── .gitignore            # Ignored files
-├── README.md             # Project documentation
-└── package.json          # Root scripts and devDependencies
+│   │   ├── data/              # CSV files (kepler_data.csv)
+│   │   ├── models/            # Mongoose schemas & connectors
+│   │   ├── routes/            # API routes (launches, planets)
+│   │   ├── services/          # DB connection & external API clients
+│   │   ├── app.js             # Express app configuration
+│   │   └── server.js          # HTTP server bootstrap
+│   ├── .env                   # environment variables
+│   └── package.json
+├── .github/                   # CI workflows
+│   └── workflows/
+│       └── node.yml
+├── package.json               # root scripts & dependencies
+└── README.md
 ```
 
-## Build & Deployment
-- **Bootstrap**: `npm run bootstrap` installs all dependencies.
-- **Build & Deploy**: `npm run deploy` runs:
-  1. `npm run build --prefix client` (output to `server/public` via `cross-env`)
-  2. `npm start --prefix server`
+---
 
-## Learning Experience
-Throughout this project, I have:
-- Designed and implemented a scalable REST API using Node.js and Express
-- Implemented middleware and used Morgan for HTTP request logging
-- Configured CORS and environment variables with dotenv
-- Set up a monorepo-style workflow to build and serve client & server together
-- Automated the build process so React assets output directly to `server/public`
-- Integrated ARWES UI framework for a space-themed interface
-- Developed best practices for project structure and npm scripting
-- Enhanced error handling and logging for production readiness
+## 🌐 External API Integration
+
+- **SpaceX Launches**  
+  The backend uses Axios to POST a query to the SpaceX API (configured via `SPACEX_API_URL`) and stores results in MongoDB.  
+  Example snippet from `services/query.js`:
+  ```js
+  import axios from 'axios';
+  const response = await axios.post(process.env.SPACEX_API_URL, { query: {}, options: {} });
+  const launches = response.data.docs;
+  ```
+- All external endpoints are driven by environment variables for flexibility.
+
+---
+
+## 📊 Data Ingestion
+
+- **Kepler Planet Data**  
+  On server startup, `services/mongo.js` reads `kepler_data.csv` and upserts all confirmed habitable planets into the `planets` collection.
+
+- **Launch Records**  
+  The `launches` route exposes CRUD operations backed by the `launches` collection in MongoDB.
+
+---
+
+## 🚀 Development & Usage
+
+Run both frontend and backend with hot reload:
+
+```bash
+npm run dev
+```
+
+- Frontend: http://localhost:3000  
+- Backend API: http://localhost:5000/v1  
+
+---
+
+## 🏗️ Build & Deployment
+
+Build the React app and start the backend:
+
+```bash
+npm run deploy
+```
+
+- Client is built into `server/public` thanks to `cross-env BUILD_PATH`  
+- Backend serves both API routes and static assets in production
+
+---
+
+## 🎓 Learning Outcomes
+
+This project deepened my skills in:
+
+- Designing a **RESTful API** with Express and Mongoose  
+- Consuming and integrating a **public API** (SpaceX) in a production workflow  
+- Managing **monorepo-style** scripts and build pipelines  
+- Automating **CI/CD** with GitHub Actions matrix builds  
+- Implementing **data ingestion** from both CSV and external sources  
+- Structuring code for **scalability**, readability, and testability
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Open an issue or submit a pull request. Please follow the existing code style and add tests for new features.
+
+---
+
+## 📜 License
+
+ISC © 2025. See [LICENSE](LICENSE) for details.
