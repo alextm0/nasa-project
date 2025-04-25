@@ -1,11 +1,12 @@
 import request from 'supertest';
 import app from '../../app.js';
 
-import { connectDB, disconnectDB } from '../../services/mongo.js';
+import { connectDB, disconnectDB, loadInitialData } from '../../services/mongo.js';
 
 describe('Launches API', () => {
   beforeAll(async () => {
     await connectDB();
+    await loadInitialData();
   });
 
   afterAll(async () => {
