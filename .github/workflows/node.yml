@@ -1,17 +1,32 @@
 name: NASA Project CI
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3 # Checkout the repository
-      - name: Use Node.js version 20
-        uses: actions/setup-node@v3 # Setup Node.js
+      # 1) Check out the repo
+      - uses: actions/checkout@v3
+
+      # 2) Set up Node.js
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
         with:
-          node-version: '20' # Specify the Node.js version
-      - run: npm install # Install dependencies
-      - run: npm run build --prefix client # Build the client
+          node-version: '20'
+
+      # 3) Install root-level deps (concurrently, axios, etc.)
+      - name: Install root dependencies
+        run: npm ci
+
+      # 4) Install client dependencies (cross-env, react-scripts, …)
+      - name: Install client dependencies
+        run: npm ci --prefix client
+
+      # 5) Build the client
+      - name: Build client
+        run: npm run build --prefix client
