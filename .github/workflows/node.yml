@@ -1,0 +1,17 @@
+name: NASA Project CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3 # Checkout the repository
+      - name: Use Node.js version 20
+        uses: actions/setup-node@v3 # Setup Node.js
+        with:
+          node-version: '20' # Specify the Node.js version
+      - run: npm install # Install dependencies
+      - run: npm run build --prefix client # Build the client
