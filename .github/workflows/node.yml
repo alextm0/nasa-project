@@ -10,22 +10,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1) Check out the repo
+      # 1) Check out your code
       - uses: actions/checkout@v3
 
-      # 2) Set up Node.js
+      # 2) Pick the Node.js version
       - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3) Install root-level deps (concurrently, axios, etc.)
+      # 3) Install root dependencies (resolves your lockfile mismatch)
       - name: Install root dependencies
-        run: npm ci
+        run: npm install
 
-      # 4) Install client dependencies (cross-env, react-scripts, …)
+      # 4) Install client dependencies (including cross-env)
       - name: Install client dependencies
-        run: npm ci --prefix client
+        run: npm install --prefix client
 
       # 5) Build the client
       - name: Build client
